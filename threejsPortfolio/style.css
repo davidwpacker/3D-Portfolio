@@ -1,0 +1,5 @@
+#canvas {
+  position: fixed;
+  top: 0;
+  left: 0; /* pins it to top left of screen. other html elements will be put over it*/
+}
