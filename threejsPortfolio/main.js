@@ -30,6 +30,34 @@ const torus = new THREE.Mesh( geometry, material);
 
 scene.add(torus); // adding to the scene 
 
+// AVATAR (texture mapping = 2d pixels mapped to 3d geomtry)
+const davidTexture = new THREE.TextureLoader().load('./images/selfie.jpg'); // right now image is inside of moon. Scroll inwards to see. fix this
+
+const david = new THREE.Mesh(
+  new THREE.BoxGeometry(3,3,3), 
+  new THREE.MeshBasicMaterial( { map: davidTexture} )
+);
+scene.add(david); // not appearing for some reason. Perhaps wrong location
+
+// MOON 
+const moonTexture = new THREE.TextureLoader().load('./images/moon.jpeg');
+const normalTexture = new THREE.TextureLoader().load('./images/normal.jpeg'); //adds depth to the moon. Essentially a coat. rocky/mountainous Texture (allows light to bounce off)
+
+const moon = new THREE.Mesh(
+  new THREE.SphereGeometry(3,32, 32), //sphere radius of 3
+  new THREE.MeshStandardMaterial({
+    map: moonTexture, // maps image around the sphere so it's inside it. 
+    normalMap: normalTexture 
+  })
+);
+scene.add(moon);
+
+moon.position.z = 30; // moon repositioned further down the z-axis since that's the direction that'll be scrolled in
+moon.position.setX(-10); //.setX( value) and moon.position.x = value; are the SAME thing. Different way of writing it
+
+
+
+
 
 const pointLight = new THREE.PointLight(0xffffff); // 0x is a hexidecimal literal/value which just lets the OS know that youre not using random values & colour is white // this is essentiall a lightbulb which will show our object. Without this, the room is dark. Since we removed MeshBasicMaterial & wireframe: true
 pointLight.position.set(5,5,5); // positioned inside the torus so it's lit up. values: 20,20,20 pushes it further out so u see the full object view 
@@ -52,12 +80,35 @@ function addStar() {
   const [x, y, z] = Array(3).fill().map( () => THREE.MathUtils.randFloatSpread(100) )       // each object to be randomly generated in different positions. randfloatsprad generates a random number from -100 to 100. 
 
   star.position.set(x,y,z);
+  scene.add(star);
 }
+Array(200).fill().forEach(addStar);
+
+
+const spaceTexture = new THREE.TextureLoader().load('./images/spaceBg.jpeg') // load jpg images. callback function can go inside string to be notified when image is done loading. Useful if scene relies a lot on static assets and sth is loading.
+scene.background =  spaceTexture; // used to set the image as bg. 
+
+
 
 
 
 renderer.render( scene, camera ); // to actually SEE it we need to call this render method... again. BUT using a function w/ animate is easier 
 
+
+function moveCamera() {
+  const t = document.body.getBoundingClientRect().top; // to find out current users position. Gives us the viewport's dimensions and .top lets us know how far we are from the top of the webpage. 
+  moon.rotation.x += 0.05;
+  moon.rotation.y += 0.075;
+  moon.rotation.z += 0.05;
+
+  david.rotation.y += 0.01;
+  david.rotation.z += 0.01;
+
+  camera.position.z = t * -0.01; // t for TOP will always be a negative number so we gotta multiply it by a neg to make it pos
+  camera.position.x = t * -0.0002;
+  camera.position.y = t * -0.0002;
+}
+document.body.onscroll = moveCamera; // this function has been assigned this event handler which runs every time the user scrolls (moves the camera)
 
 function animate() { // recursive function that gives us an infinite loop which calls the render method automatically 
   requestAnimationFrame( animate );
